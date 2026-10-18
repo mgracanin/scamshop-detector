@@ -44,7 +44,7 @@
 
 1. Preuzmite ili klonirajte repozitorij na svoje računalo:
    ```bash
-   git clone https://github.com/mgracanin/iffy-checker.git
+   git clone https://github.com/mgracanin/scamshop-detector.git
    ```
 2. Otvorite Google Chrome (ili Brave, Edge, Opera) i posjetite:
    ```text
