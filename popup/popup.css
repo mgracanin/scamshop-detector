@@ -93,6 +93,20 @@ body {
   display: block;
 }
 
+.header-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  background-color: var(--secondary-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
 .protection-status-badge {
   display: flex;
   align-items: center;
@@ -289,14 +303,26 @@ body {
 }
 
 /* --- STATE SPECIFIC CARD OVERRIDES --- */
+.status-ready {
+  --status-color: var(--accent-color);
+  border-color: var(--border-color);
+  background: var(--card-bg);
+}
+
 .status-checking {
   --status-color: var(--text-secondary);
 }
 
+.status-info {
+  --status-color: #1a73e8;
+  border-color: rgba(26, 115, 232, 0.25);
+  background: var(--bg-whitelist);
+}
+
 .status-safe {
-  --status-color: #0f9d58;
-  border-color: rgba(15, 157, 88, 0.2);
-  background: var(--bg-safe);
+  --status-color: #1a73e8;
+  border-color: rgba(26, 115, 232, 0.25);
+  background: var(--bg-whitelist);
 }
 
 .status-whitelisted {
@@ -427,6 +453,51 @@ body {
 .btn-icon {
   width: 14px;
   height: 14px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-tips {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-decoration: none;
+  background-color: rgba(26, 115, 232, 0.08);
+  color: var(--accent-color);
+  border: 1px solid rgba(26, 115, 232, 0.25);
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.btn-tips:hover {
+  background-color: rgba(26, 115, 232, 0.16);
+  color: var(--accent-hover);
+}
+
+.cert-info-box {
+  background-color: var(--secondary-bg);
+  border-left: 3px solid var(--accent-color);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  text-align: left;
+}
+
+.cert-info-box p {
+  margin: 0;
+}
+
+.cert-info-box strong {
+  color: var(--text-primary);
 }
 
 /* --- HISTORY & WHITELIST LISTS --- */
@@ -671,6 +742,10 @@ input:checked + .slider:before {
 
 .stat-value.stat-green {
   color: #0f9d58;
+}
+
+.stat-value.stat-blue {
+  color: var(--accent-color);
 }
 
 .stat-value.stat-red {

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>O projektu Iffy-Checker</title>
+    <title>O projektu ScamShop Detector</title>
     <style>
       :root {
         --bg-color: #f8f9fa;
@@ -16,8 +16,8 @@
         --divider-color: #f1f3f4;
         --code-bg: #eef2f6;
 
-        --badge-safe-bg: rgba(15, 157, 88, 0.12);
-        --badge-safe-text: #0d8043;
+        --badge-safe-bg: rgba(26, 115, 232, 0.12);
+        --badge-safe-text: #1a73e8;
         --badge-warn-bg: rgba(217, 48, 37, 0.12);
         --badge-warn-text: #c5221f;
         --badge-wht-bg: rgba(26, 115, 232, 0.12);
@@ -28,6 +28,8 @@
         --warning-box-bg: rgba(242, 139, 130, 0.09);
         --warning-box-border: #f28b82;
         --warning-box-text: #b31412;
+        --info-box-bg: rgba(26, 115, 232, 0.06);
+        --info-box-border: #1a73e8;
       }
 
       @media (prefers-color-scheme: dark) {
@@ -42,8 +44,8 @@
           --divider-color: #2d2f31;
           --code-bg: #2d3139;
 
-          --badge-safe-bg: rgba(129, 201, 149, 0.18);
-          --badge-safe-text: #81c995;
+          --badge-safe-bg: rgba(138, 180, 248, 0.18);
+          --badge-safe-text: #8ab4f8;
           --badge-warn-bg: rgba(242, 139, 130, 0.18);
           --badge-warn-text: #f28b82;
           --badge-wht-bg: rgba(138, 180, 248, 0.18);
@@ -54,6 +56,8 @@
           --warning-box-bg: rgba(242, 139, 130, 0.12);
           --warning-box-border: #d93025;
           --warning-box-text: #f6aea9;
+          --info-box-bg: rgba(138, 180, 248, 0.08);
+          --info-box-border: #8ab4f8;
         }
       }
 
@@ -72,7 +76,7 @@
       }
 
       .container {
-        max-width: 660px;
+        max-width: 680px;
         margin: 0 auto;
         background: var(--card-bg);
         border: 1px solid var(--border-color);
@@ -172,13 +176,13 @@
         border: 1px solid var(--warning-box-border);
         border-radius: 14px;
         padding: 18px 20px;
-        margin-bottom: 26px;
+        margin-bottom: 24px;
       }
 
       .disclaimer-title {
         font-weight: 700;
         color: var(--warning-box-text);
-        margin-bottom: 6px;
+        margin-bottom: 8px;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -186,9 +190,27 @@
       }
 
       .disclaimer-text {
-        margin: 0;
+        margin: 0 0 10px 0;
         font-size: 13.5px;
         line-height: 1.55;
+        color: var(--text-primary);
+      }
+
+      .disclaimer-text:last-child {
+        margin-bottom: 0;
+      }
+
+      /* Notice Box for DB behavior */
+      .notice-box {
+        background-color: var(--info-box-bg);
+        border-left: 4px solid var(--info-box-border);
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin: 20px 0;
+        font-size: 13.5px;
+      }
+
+      .notice-box strong {
         color: var(--text-primary);
       }
 
@@ -362,17 +384,17 @@
       
       <!-- Header -->
       <header class="header">
-        <img src="../icons/icon48.png" alt="Iffy‑Checker Logo" class="logo" />
+        <img src="../icons/icon48.png" alt="ScamShop Detector Logo" class="logo" />
         <div class="header-meta">
-          <h1>Iffy‑Checker</h1>
+          <h1>ScamShop Detector</h1>
           <p class="subtitle">
-            <span class="version-tag">v1.0.0</span>
-            <span>Zaštita od lažnih internetskih trgovina</span>
+            <span class="version-tag">v1.1.0</span>
+            <span>Provjera internetskih trgovina u bazi servisa CERT iffy</span>
           </p>
         </div>
       </header>
 
-      <!-- Legal Disclaimer -->
+      <!-- Legal Disclaimer & CERT Notice -->
       <div class="disclaimer-box">
         <div class="disclaimer-title">
           <svg style="width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
@@ -380,12 +402,21 @@
             <line x1="12" y1="9" x2="12" y2="13"/>
             <line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
-          Važna pravna napomena (Odricanje odgovornosti)
+          Važna pravna napomena i odricanje odgovornosti
         </div>
         <p class="disclaimer-text">
-          Ovo proširenje je <strong>neovisan projekt otvorenog koda</strong>. Autor proširenja (<strong>Matija Gračanin</strong>) nije službeno povezan s CARNET-om niti s Nacionalnim CERT-om. 
-          Proširenje je razvijeno besplatno kako bi korisnicima omogućilo jednostavniju i bržu provjeru internetskih trgovina korištenjem javno dostupnog servisa CERT iffy.
+          Ovo proširenje je <strong>neovisan projekt otvorenog koda</strong>. Proširenje <strong>nije razvio, ne održava niti je u vlasništvu Hrvatske akademske i istraživačke mreže – CARNET ili Nacionalnog CERT-a</strong>.
         </p>
+        <p class="disclaimer-text">
+          Autor, izdavač i osoba odgovorna za održavanje proširenja je <strong>Matija Gračanin</strong>. Proširenje je razvijeno s ciljem olakšavanja pristupa provjeri internetskih trgovina putem javno dostupnog servisa <strong>CERT iffy</strong> (<a href="https://iffy.cert.hr/" target="_blank" rel="noopener">iffy.cert.hr</a>).
+        </p>
+      </div>
+
+      <!-- Critical Database Nature Clarification -->
+      <div class="notice-box">
+        <strong>Kako funkcionira provjera u bazi CERT iffy:</strong><br />
+        Servis CERT iffy u trenutku unosa domene <strong>ne provodi analizu stranice u stvarnom vremenu</strong>, već provjerava nalazi li se domena na popisu trgovina koje je Nacionalni CERT <strong>već ranije detektirao kao lažne</strong>.<br /><br />
+        Ako sustav nije prepoznao domenu kao lažnu internetsku trgovinu, to <strong>ne znači da je stranica automatski sigurna za kupovinu</strong>. CERT iffy služi kao alat za što informiranije donošenje odluke, no korisnik odluku o kupovini uvijek donosi na vlastitu odgovornost. Prije svake kupovine preporučuje se proučiti službene <a href="https://iffy.cert.hr/tips" target="_blank" rel="noopener">Dodatne savjete</a>.
       </div>
 
       <!-- Overview -->
@@ -398,7 +429,7 @@
         O projektu
       </h2>
       <p>
-        <strong>Iffy-Checker</strong> je proširenje za preglednike temeljene na Chromiumu, kao što su Google Chrome, Brave, Microsoft Edge i Opera. Tijekom pregledavanja weba automatski provjerava domene posjećenih stranica putem servisa CERT iffy i upozorava korisnika ako je domena označena kao sumnjiva ili lažna internetska trgovina.
+        <strong>ScamShop Detector</strong> je proširenje za preglednike temeljene na Chromiumu (Google Chrome, Brave, Microsoft Edge, Opera). Omogućuje jednostavnu i brzu provjeru domene aktivne kartice ili bilo koje unesene adrese u bazi servisa CERT iffy.
       </p>
 
       <!-- Key Capabilities -->
@@ -406,12 +437,13 @@
         <div class="feature-card">
           <div class="feature-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22C17.5 19.1 19 14.5 19 9.5V5L12 2L5 5V9.5C5 14.5 6.5 19.1 12 22Z"/>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            Automatska provjera u pozadini
+            Provjera isključivo na zahtjev (klik)
           </div>
           <p class="feature-desc">
-            Automatski provjerava domenu otvorene stranice i status prikazuje na ikoni proširenja, bez potrebe za ručnim pokretanjem provjere.
+            Radi zaštite servisa CERT iffy od preopterećenja i osiguravanja redovite noćne obrade lažnih trgovina, proširenje ne skenira automatski svaku posjećenu stranicu. Provjeru pokrećete isključivo kada vi to zatražite.
           </p>
         </div>
 
@@ -423,20 +455,19 @@
             Popis pouzdanih domena (Whitelist)
           </div>
           <p class="feature-desc">
-            Trgovine, banke i druge domene kojima vjerujete možete dodati na vlastiti popis pouzdanih domena. Pravilo se primjenjuje i na njihove poddomene.
+            Trgovine, banke i druge provjerene domene kojima vjerujete možete dodati na svoj korisnički popis dopuštenih domena. Pravilo se primjenjuje i na njihove poddomene.
           </p>
         </div>
 
         <div class="feature-card">
           <div class="feature-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
             Ručna provjera i desni klik
           </div>
           <p class="feature-desc">
-            Bilo koju domenu ili poveznicu možete provjeriti prije otvaranja, iz skočnog prozora proširenja ili kontekstnog izbornika koji se otvara desnim klikom.
+            Bilo koju domenu možete unijeti i provjeriti izravno u skočnom prozoru ili desnim klikom miša na poveznicu/stranicu prije nego je posjetite.
           </p>
         </div>
 
@@ -445,10 +476,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
-            Lokalna povijest i statistika
+            Lokalna evidencija i statistika
           </div>
           <p class="feature-desc">
-            Proširenje vodi evidenciju provjera i prikazuje osnovnu statistiku korištenja. Ti se podaci pohranjuju isključivo na vašem uređaju.
+            Proširenje vodi evidenciju vaših provjera i osnovnu statistiku. Svi se podaci čuvaju isključivo na vašem uređaju i ne šalju se nikakvim vanjskim poslužiteljima.
           </p>
         </div>
       </div>
@@ -459,22 +490,22 @@
           <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
           <line x1="7" y1="7" x2="7.01" y2="7"/>
         </svg>
-        Značenje oznaka
+        Značenje oznaka (Bedževa)
       </h2>
       <div class="badge-legend">
         <div class="badge-row">
-          <span class="badge-pill safe">OK</span>
+          <span class="badge-pill safe">INF</span>
           <div class="badge-info">
-            <strong>Nema upozorenja</strong>
-            <span class="badge-sub">Domena nije identificirana kao lažna internetska trgovina u bazi CERT iffy.</span>
+            <strong>Nije u bazi lažnih trgovina</strong>
+            <span class="badge-sub">Sustav CERT iffy nije prepoznao domenu kao lažnu internetsku trgovinu na postojećem popisu. Prije kupovine svakako provjerite Dodatne savjete.</span>
           </div>
         </div>
 
         <div class="badge-row">
           <span class="badge-pill warning">WRN</span>
           <div class="badge-info">
-            <strong>Upozorenje: Lažna ili sumnjiva trgovina!</strong>
-            <span class="badge-sub">Domena je u servisu CERT iffy označena kao sumnjiva ili lažna internetska trgovina. Ne preporučuje se unos osobnih ni kartičnih podataka.</span>
+            <strong>Upozorenje: Obilježja lažne trgovine!</strong>
+            <span class="badge-sub">Domena se nalazi u bazi prijavljenih lažnih trgovina servisa CERT iffy. Ne preporučuje se unos osobnih ni kartičnih podataka.</span>
           </div>
         </div>
 
@@ -489,8 +520,8 @@
         <div class="badge-row">
           <span class="badge-pill error">ERR</span>
           <div class="badge-info">
-            <strong>Pogreška ili nedostupan poslužitelj</strong>
-            <span class="badge-sub">Servis trenutačno nije dostupan ili unesena adresa nije valjana.</span>
+            <strong>Pogreška ili nedostupan servis</strong>
+            <span class="badge-sub">Servis CERT iffy trenutačno nije dostupan ili unesena adresa nije valjana.</span>
           </div>
         </div>
       </div>
@@ -501,10 +532,10 @@
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
         </svg>
-        O Nacionalnom CERT-u i servisu CERT iffy
+        O servisu CERT iffy
       </h2>
       <p>
-        Za provjeru internetskih trgovina proširenje koristi podatke javno dostupnog servisa
+        Za provjeru internetskih trgovina proširenje koristi podatke servisa
         <a href="https://iffy.cert.hr/" target="_blank" rel="noopener">iffy.cert.hr</a>.
       </p>
       
@@ -527,13 +558,14 @@
         Privatnost podataka i sigurnost
       </h2>
       <p>
-        Iffy-Checker je osmišljen tako da servisu za provjeru šalje samo podatke potrebne za provjeru domene:
+        ScamShop Detector je dizajniran s naglaskom na privatnost korisnika:
       </p>
       <ul class="changelog-list">
-        <li><strong>Provjerava se samo domena:</strong> servisu CERT iffy šalje se <em>isključivo</em> naziv domene, primjerice <code>trgovina.hr</code>. Putanje podstranica, parametri URL-a, identifikatori i tokeni sesije uklanjaju se prije provjere.  </li>
-        <li><strong>Bez praćenja korisnika:</strong> proširenje ne prikuplja osobne podatke ni kolačiće preglednika te ne koristi sustave za analitiku trećih strana.</li>
-        <li><strong>Privremena pohrana rezultata:</strong> rezultati provjera čuvaju se deset minuta kako bi se izbjeglo nepotrebno ponavljanje zahtjeva i smanjilo opterećenje servisa CERT iffy.</li>
-        <li><strong>Ograničen skup dozvola (Manifest V3):</strong> proširenje koristi dozvole <code>tabs</code>, <code>storage</code>, <code>contextMenus</code> potrebne za provjeru aktivne stranice, lokalnu pohranu postavki i rad kontekstnog izbornika.</li>
+        <li><strong>Provjerava se samo naziv domene:</strong> servisu CERT iffy šalje se <em>isključivo</em> očišćeni naziv domene (npr. <code>trgovina.hr</code>). Putanje podstranica, upitni parametri, privatni identifikatori i tokeni sesije nikada se ne šalju.</li>
+        <li><strong>Nema praćenja korisnika:</strong> proširenje ne prikuplja nikakve osobne podatke, ne pristupa kolačićima korisnika i ne koristi vanjske analitičke alate.</li>
+        <li><strong>Bez automatskog pozadinskog skeniranja:</strong> proširenje ne šalje upite za svaku stranicu koju otvorite, već isključivo kada kliknete na provjeru.</li>
+        <li><strong>Privremena predmemorija (Cache):</strong> rezultati se privremeno čuvaju do 10 minuta kako bi se spriječilo ponavljanje istih upita i zaštitila infrastruktura servisa CERT iffy.</li>
+        <li><strong>Minimalne dozvole (Manifest V3):</strong> proširenje koristi samo nužne dozvole (<code>contextMenus</code>, <code>tabs</code>, <code>storage</code>).</li>
       </ul>
 
       <!-- Footer -->
@@ -545,6 +577,8 @@
           <a href="https://github.com/mgracanin/iffy-checker" target="_blank" rel="noopener">GitHub Repozitorij</a>
           <span>•</span>
           <a href="https://iffy.cert.hr/" target="_blank" rel="noopener">iffy.cert.hr</a>
+          <span>•</span>
+          <a href="https://iffy.cert.hr/tips" target="_blank" rel="noopener">Dodatni savjeti</a>
           <span>•</span>
           <a href="https://www.cert.hr/" target="_blank" rel="noopener">Nacionalni CERT</a>
         </div>

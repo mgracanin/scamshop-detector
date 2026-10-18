@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Iffy-Checker</title>
+    <title>ScamShop Detector</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
@@ -12,13 +12,12 @@
       <div class="logo-area">
         <img src="../icons/icon48.png" alt="Logo" class="logo-img" />
         <div>
-          <h1 class="logo-title">Iffy-Checker</h1>
-          <span class="logo-subtitle">Servis CERT iffy</span>
+          <h1 class="logo-title">ScamShop Detector</h1>
+          <span class="logo-subtitle">Provjera u bazi servisa CERT iffy</span>
         </div>
       </div>
-      <div class="protection-status-badge active" id="protectionStatusBadge">
-        <span class="status-dot"></span>
-        <span class="status-text">Zaštita aktivna</span>
+      <div class="header-badge" id="headerModeBadge" title="Provjera se provodi isključivo na vaš zahtjev (klik)">
+        <span>Provjera na klik</span>
       </div>
     </header>
 
@@ -35,21 +34,48 @@
               <path d="M12 22C17.5 19.1 19 14.5 19 9.5V5L12 2L5 5V9.5C5 14.5 6.5 19.1 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <div class="shield-icon-overlay" id="shieldOverlay">
-              <!-- Inline Check/Warn symbols inside JS -->
+              <!-- Inline Info/Warn symbols inside JS -->
             </div>
           </div>
-          <h2 class="status-verdict" id="statusVerdict">Provjera u tijeku...</h2>
-          <p class="status-domain" id="statusDomain">učitavanje...</p>
-          <p class="status-description" id="statusDescription">Provjera domene u bazi podataka servisa CERTiffy...</p>
+          <h2 class="status-verdict" id="statusVerdict">Učitavanje stranice...</h2>
+          <p class="status-domain" id="statusDomain">...</p>
+          <p class="status-description" id="statusDescription">Priprema provjere domene...</p>
+
+          <!-- Primary Trigger Button for Active Tab -->
+          <div class="main-action-area" id="mainActionArea" style="display: none; margin-top: 14px; width: 100%;">
+            <button class="btn btn-primary btn-block" id="btnCheckActiveTab">
+              <svg viewBox="0 0 24 24" class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span>Provjeri ovu domenu</span>
+            </button>
+          </div>
+
+          <!-- Official Tips Link Area (shown after check) -->
+          <div class="tips-action-area" id="tipsActionArea" style="display: none; margin-top: 12px; width: 100%;">
+            <a href="https://iffy.cert.hr/tips" target="_blank" rel="noopener" class="btn btn-tips" id="btnTipsLink">
+              <svg viewBox="0 0 24 24" class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>Dodatni savjeti za sigurnu kupovinu</span>
+            </a>
+          </div>
           
-          <div class="action-row" id="safetyActionRow" style="display: none;">
+          <div class="action-row" id="safetyActionRow" style="display: none; margin-top: 10px;">
             <button class="btn btn-secondary btn-sm" id="btnWhitelistCurrent">
-              <!-- Star icon -->
               <svg viewBox="0 0 24 24" class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
               <span>Vjeruj ovoj domeni</span>
             </button>
+          </div>
+
+          <!-- Educational disclaimer regarding database nature -->
+          <div class="cert-info-box" id="certInfoBox" style="margin-top: 14px;">
+            <p><strong>Važna napomena:</strong> CERT iffy provjerava nalazi li se domena na popisu trgovina koje su prethodno detektirane kao lažne. Servis ne analizira stranicu uživo u trenutku provjere.</p>
           </div>
         </div>
 
@@ -57,7 +83,7 @@
         <div class="manual-check-container">
           <h3 class="section-title">Ručna provjera domene</h3>
           <form class="search-box" id="manualCheckForm">
-            <input type="text" id="manualCheckInput" placeholder="Npr. google.com, sumnjiva-stranica.hr" autocomplete="off" aria-label="Domena za provjeru" />
+            <input type="text" id="manualCheckInput" placeholder="Npr. trgovina.hr, sumnjivi-shop.com" autocomplete="off" aria-label="Domena za provjeru" />
             <button type="submit" class="btn btn-primary" id="btnManualCheck">Provjeri</button>
           </form>
         </div>
@@ -85,29 +111,30 @@
 
       <!-- Tab 3: Settings & Stats -->
       <section id="tab-settings" class="tab-panel">
-        <!-- Protection Switch Control -->
+        <!-- On-Demand Explanation Card -->
         <div class="settings-row card-row">
           <div class="settings-text">
-            <h4 class="settings-label">Automatska zaštita</h4>
-            <p class="settings-desc">Provjeravaj stranice u pozadini tijekom pregledavanja.</p>
+            <h4 class="settings-label" style="display: flex; align-items: center; gap: 6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px; color: var(--accent-color);">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              Provjera isključivo na zahtjev
+            </h4>
+            <p class="settings-desc">Kako bi se spriječilo preopterećenje poslužitelja CERT iffy i osigurala noćna obrada prijava, proširenje provjerava domene isključivo kada kliknete na provjeru.</p>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="toggleProtection" checked />
-            <span class="slider"></span>
-          </label>
         </div>
 
         <!-- Session Stats Dashboard -->
         <div class="stats-dashboard">
-          <h4 class="section-title">Statistika sesije</h4>
+          <h4 class="section-title">Statistika provjera</h4>
           <div class="stats-grid">
             <div class="stat-card">
               <span class="stat-value" id="statScanned">0</span>
-              <span class="stat-label">Skenirano</span>
+              <span class="stat-label">Provjereno</span>
             </div>
             <div class="stat-card">
-              <span class="stat-value stat-green" id="statSafe">0</span>
-              <span class="stat-label">Sigurno</span>
+              <span class="stat-value stat-blue" id="statSafe">0</span>
+              <span class="stat-label">Nije u bazi</span>
             </div>
             <div class="stat-card">
               <span class="stat-value stat-red" id="statWarnings">0</span>
@@ -149,9 +176,9 @@
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
               </svg>
-              O proširenju &amp; privatnost
+              O proširenju &amp; važne napomene
             </h4>
-            <p class="settings-desc">Saznajte više informacija o projektu.</p>
+            <p class="settings-desc">Saznajte više o radu servisa CERT iffy, autoru i privatnosti.</p>
           </div>
           <div style="color: var(--text-secondary); display: flex; align-items: center;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
@@ -169,7 +196,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22C17.5 19.1 19 14.5 19 9.5V5L12 2L5 5V9.5C5 14.5 6.5 19.1 12 22Z"/>
         </svg>
-        <span>Zaštita</span>
+        <span>Provjera</span>
       </button>
       <button class="nav-btn" data-tab="tab-history">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

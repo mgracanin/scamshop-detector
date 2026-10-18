@@ -1,62 +1,83 @@
-# Iffy‑Checker (Chrome Extension)
+# ScamShop Detector (Chrome Extension)
 
-**Iffy‑Checker** is a Google Chrome (Manifest V3) extension that automatically checks visited online stores against the official **CERT‑HR Iffy** database ([iffy.cert.hr](https://iffy.cert.hr/)) to protect users against fraudulent web shops and phishing scams.
+**ScamShop Detector** is a Google Chrome (Manifest V3) extension that enables users to check web shops against the official **CERT iffy** database ([iffy.cert.hr](https://iffy.cert.hr/)) on demand, helping protect against fraudulent online stores and phishing scams.
 
----
-
-## Features
-
-- **Automatic Background Protection**: Automatically verifies store domains during browsing and displays status badges directly on the extension toolbar icon:
-  - `OK` (Green): Verified safe / not in the database of fraudulent stores.
-  - `WRN` (Red): Identified as a suspicious or fraudulent web shop.
-  - `WHT` (Blue): Domain is on your trusted whitelist.
-  - `ERR` (Gray): Network or verification error.
-- **Detailed Popup Dashboard**:
-  - Immediate visual shield card indicating domain safety.
-  - One-click "Trust this domain" whitelist toggle.
-  - Manual domain search form for testing any URL or store address.
-- **Activity History**: Tracks recent checks with timestamps and quick-delete controls.
-- **Whitelist Manager**: Add, remove, and manage trusted domains with automatic `www.` normalization.
-- **Privacy First**: Only sanitized domain names (e.g. `trgovina.hr`) are transmitted to the verification API. Full URLs, paths, query parameters, search queries, and personal data are never sent or stored.
-- **Fast & Efficient**: Built-in in-memory caching and session reuse minimize network requests and optimize performance.
+> **Važna napomena / Disclaimer:**  
+> Ovo proširenje je **neovisan projekt otvorenog koda**. Proširenje **nije razvio, ne održava niti je u vlasništvu Hrvatske akademske i istraživačke mreže – CARNET ili Nacionalnog CERT-a**.  
+> Autor i održavatelj proširenja: **Matija Gračanin**.  
+> Proširenje se oslanja na javno dostupan servis [CERT iffy](https://iffy.cert.hr/).
 
 ---
 
-## Installation (Developer Mode)
+## Kako funkcionira provjera
 
-Since this is a custom extension, install it directly in Chromium browsers:
+1. **Provjera isključivo na zahtjev (On-Demand)**:  
+   Prema preporuci Nacionalnog CERT-a, proširenje **ne skenira automatski svaku posjećenu stranicu** kako bi se spriječilo preopterećenje poslužitelja i omogućila nesmetana noćna obrada prijava lažnih trgovina. Provjera se pokreće isključivo kada korisnik klikne na gumb *"Provjeri ovu domenu"*, unese domenu ručno ili odabere provjeru desnim klikom miša.
 
-1. Clone or download this repository to your local computer.
-2. Open Google Chrome (or Edge, Brave, etc.) and navigate to:
+2. **Provjera u bazi prethodno detektiranih trgovina**:  
+   Servis CERT iffy u trenutku unosa domene **ne analizira obilježja stranice u stvarnom vremenu**, već provjerava nalazi li se domena na popisu trgovina koje je Nacionalni CERT već ranije detektirao kao lažne.  
+   Ako domena nije u bazi, to **ne jamči apsolutnu sigurnost stranice**. Servis služi kao pomoćni alat za informirano donošenje odluka, a korisnik odluku donosi na vlastitu odgovornost. Prije svake kupovine preporučuje se provjeriti službene [Dodatne savjete za sigurnu kupovinu](https://iffy.cert.hr/tips).
+
+---
+
+## Oznake statusa (Bedževi)
+
+- **`INF`** (Plava/Siva): Domena nije prepoznata kao lažna trgovina u bazi servisa CERT iffy. Prije kupovine provjerite [Dodatne savjete](https://iffy.cert.hr/tips).
+- **`WRN`** (Crvena): Upozorenje! Poveznica ima obilježja lažne internetske trgovine u bazi servisa CERT iffy.
+- **`WHT`** (Plava): Domena se nalazi na vašem korisničkom popisu pouzdanih adresa (Whitelist).
+- **`ERR`** (Siva): Servis CERT iffy trenutačno nije dostupan ili je unesena nevaljana adresa.
+
+---
+
+## Mogućnosti
+
+- **Provjera jednim klikom**: Provjerite aktivnu karticu jednim klikom na gumb unutar skočnog prozora proširenja.
+- **Kontekstni izbornik (Desni klik)**: Kliknite desnom tipkom miša na bilo koju poveznicu ili stranicu i odaberite *"Provjeri domenu sa servisom CERT iffy"*.
+- **Ručni unos**: Unesite bilo koju domenu u tražilicu unutar proširenja prije nego što posjetite stranicu.
+- **Popis pouzdanih adresa (Whitelist)**: Dodajte vlastite provjerene trgovine i banke u popis pouzdanih domena.
+- **Privatnost na prvom mjestu**: Servisu se šalje isključivo naziv domene (npr. `trgovina.hr`). Puni URL-ovi, parametri, korisnički tokeni i osobni podaci nikada se ne šalju.
+- **Lokalna pohrana**: Povijest provjera i statistika spremaju se isključivo lokalno na računalu korisnika.
+
+---
+
+## Instalacija (Developer Mode)
+
+1. Preuzmite ili klonirajte repozitorij na svoje računalo:
+   ```bash
+   git clone https://github.com/mgracanin/iffy-checker.git
+   ```
+2. Otvorite Google Chrome (ili Brave, Edge, Opera) i posjetite:
    ```text
    chrome://extensions
    ```
-3. Enable **Developer mode** using the toggle in the top-right corner.
-4. Click **Load unpacked** in the top-left corner.
-5. Select this project folder (`iffy-checker`).
-6. The Iffy‑Checker icon will appear in your extension toolbar! Pin it for easy viewing.
+3. U gornjem desnom kutu omogućite **Developer mode** (Način rada za razvojne programere).
+4. Kliknite **Load unpacked** (Učitaj raspakirano) u gornjem lijevom kutu.
+5. Odaberite mapu ovog projekta.
+6. Ikona **ScamShop Detector** pojavit će se na traci proširenja!
 
 ---
 
-## Project Structure
+## Struktura projekta
 
 ```text
-├── manifest.json         # Extension Manifest V3 configuration
-├── service_worker.js     # Background worker (caching, API calls, badges)
+├── manifest.json         # Manifest V3 konfiguracija proširenja
+├── service_worker.js     # Pozadinski radnik (upiti prema API-ju, predmemorija, bedževi)
 ├── popup/
-│   ├── popup.html        # Extension popup UI (Tabs: Safety, History, Settings)
-│   ├── popup.css         # Google Material 3 styling (light & dark mode support)
-│   ├── popup.js          # Interactive popup logic & DOM management
-│   └── about.html        # Options & Privacy documentation page
+│   ├── popup.html        # Sučelje skočnog prozora (Provjera, Povijest, Postavke)
+│   ├── popup.css         # Moderni Google Material 3 stilovi (svijetla i tamna tema)
+│   ├── popup.js          # Logika sučelja na zahtjev korisnika
+│   └── about.html        # Detaljne informacije, upute i pravne napomene
 ├── icons/
-│   ├── icon16.png        # 16x16 icon
-│   ├── icon48.png        # 48x48 icon
-│   └── icon128.png       # 128x128 icon
+│   ├── icon16.png        # Ikona 16x16
+│   ├── icon48.png        # Ikona 48x48
+│   └── icon128.png       # Ikona 128x128
 └── README.md
 ```
 
 ---
 
-## Disclaimer
+## Licenca i autorstvo
 
-This is an unofficial open-source project and is not affiliated with CARNET or National CERT. Verification results are provided for informational purposes relying on the public CERT iffy service.
+- **Autor i održavatelj**: Matija Gračanin
+- **Servis za provjeru**: [CERT iffy](https://iffy.cert.hr/) (CARNET / Nacionalni CERT)
+- **Službeni savjeti**: [iffy.cert.hr/tips](https://iffy.cert.hr/tips)

@@ -1,6 +1,8 @@
 /**
- * Iffy‑Checker background service worker (Enhanced V3)
- * Handles automatic domain analysis, whitelisting, history logging, and stats.
+ * ScamShop Detector background service worker
+ * Handles on-demand domain analysis via CERT iffy API, whitelisting, history logging, and caching.
+ * Unofficial extension - not developed by CARNET or Nacionalni CERT.
+ * Author: Matija Gračanin
  */
 
 const IFFY_ROOT = "https://iffy.cert.hr";
@@ -87,30 +89,27 @@ function safeSetTitle(tabId, title) {
 }
 
 // Update Badge UI & Tooltip based on verdict
+// NOTE: We deliberately do NOT display an all-clear green checkmark (which could give a false sense of security)
 function updateUI(tabId, verdict, description) {
   if (!tabId) return;
-  if (verdict === "paused") {
-    safeSetBadgeText(tabId, "");
-    safeSetTitle(tabId, "CERT Iffy: Zaštita je pauzirana");
-    return;
-  }
 
   if (verdict === "whitelisted") {
     safeSetBadgeText(tabId, "WHT");
     safeSetBadgeBackgroundColor(tabId, "#1a73e8"); // Blue
-    safeSetTitle(tabId, `CERT Iffy: Dopuštena domena (${description || "Popis dopuštenih"})`);
+    safeSetTitle(tabId, `ScamShop Detector: Dopuštena domena (${description || "Popis pouzdanih"})`);
   } else if (verdict === "safe") {
-    safeSetBadgeText(tabId, "OK");
-    safeSetBadgeBackgroundColor(tabId, "#0f9d58"); // Green
-    safeSetTitle(tabId, `CERT Iffy: Stranica je sigurna (${description || "Nije na popisu lažnih trgovina"})`);
+    // Clean / Not in DB - show informative neutral indicator, not deceptive green guarantee
+    safeSetBadgeText(tabId, "INF");
+    safeSetBadgeBackgroundColor(tabId, "#4a5568"); // Slate gray
+    safeSetTitle(tabId, `ScamShop Detector: Nije u bazi lažnih trgovina (provjerite dodatne savjete)`);
   } else if (verdict === "warning") {
     safeSetBadgeText(tabId, "WRN");
-    safeSetBadgeBackgroundColor(tabId, "#d93025"); // Red
-    safeSetTitle(tabId, `CERT Iffy UPOZORENJE: ${description || "Moguća lažna trgovina!"}`);
+    safeSetBadgeBackgroundColor(tabId, "#d93025"); // Red alert
+    safeSetTitle(tabId, `ScamShop Detector UPOZORENJE: ${description || "Moguća lažna trgovina!"}`);
   } else {
     safeSetBadgeText(tabId, "ERR");
     safeSetBadgeBackgroundColor(tabId, "#808080"); // Gray
-    safeSetTitle(tabId, `CERT Iffy: Pogreška pri provjeri (${description || "Nepoznata greška"})`);
+    safeSetTitle(tabId, `ScamShop Detector: Pogreška pri provjeri (${description || "Servis nedostupan"})`);
   }
 }
 
@@ -203,19 +202,8 @@ async function checkUrlFull(url, forceCheck = false) {
   if (isWhitelisted(domain, whitelist)) {
     return {
       status_code: 200,
-      message: "Siguran — domena je na popisu dopuštenih.",
+      message: "Domena se nalazi na vašem popisu dopuštenih (whitelist).",
       verdict: "whitelisted",
-      domain,
-      url: domain
-    };
-  }
-
-  // If protection is paused and not a forced manual check, return paused
-  if (!protectionEnabled && !forceCheck) {
-    return {
-      status_code: 200,
-      message: "Automatska zaštita je pauzirana.",
-      verdict: "paused",
       domain,
       url: domain
     };
@@ -251,10 +239,16 @@ async function checkUrlFull(url, forceCheck = false) {
       // Domain identified in CERT-HR fraudulent store database
       verdict = "warning";
       statusCode = 200;
+      if (!message) {
+        message = "Poveznica ima obilježja lažne internetske trgovine u bazi servisa CERT iffy. Prije donošenja odluke o kupovini provjerite Dodatne savjete.";
+      }
     } else if (data.exist === false) {
       // Domain not found in fake store database
       verdict = "safe";
       statusCode = 200;
+      if (!message) {
+        message = "Sustav CERT iffy nije prepoznao ovu domenu kao lažnu internet trgovinu, no prije donošenja odluke o kupovini provjerite Dodatne savjete.";
+      }
     } else {
       // Fallback text check
       const msg = message.toLowerCase();
@@ -328,15 +322,14 @@ async function checkUrlFull(url, forceCheck = false) {
 chrome.runtime.onInstalled.addListener(async () => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
-      id: "iffy-check",
-      title: "Provjeri stranicu s Iffy",
+      id: "scamshop-check",
+      title: "Provjeri domenu sa servisom CERT iffy",
       contexts: ["page", "link"]
     });
   });
 
-  const storage = await chrome.storage.local.get(["protectionEnabled", "whitelist", "history", "stats"]);
+  const storage = await chrome.storage.local.get(["whitelist", "history", "stats"]);
   const updates = {};
-  if (storage.protectionEnabled === undefined) updates.protectionEnabled = true;
   if (storage.whitelist === undefined) updates.whitelist = [];
   if (storage.history === undefined) updates.history = [];
   if (storage.stats === undefined) updates.stats = { scanned: 0, safe: 0, warnings: 0 };
@@ -348,7 +341,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 // Context-menu trigger
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === "iffy-check" || info.menuItemId === "iffy‑check") {
+  if (info.menuItemId === "scamshop-check" || info.menuItemId === "iffy-check" || info.menuItemId === "iffy‑check") {
     const urlToTest = info.linkUrl || info.pageUrl;
     if (!urlToTest) return;
 
@@ -374,24 +367,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-// Automatically check on tab page navigation
+// Reset badge when navigating to a new URL so outdated check results are not displayed
+// NOTE: As requested by Nacionalni CERT, we do NOT automatically check every visited URL
+// to prevent server overload and preserve nightly store verification routines.
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete") {
-    if (tab.url && /^https?:/i.test(tab.url)) {
-      chrome.storage.local.get("protectionEnabled").then((res) => {
-        const active = res.protectionEnabled !== false;
-        if (!active) {
-          updateUI(tabId, "paused");
-          return;
-        }
-        checkUrlFull(tab.url, false).then((result) => {
-          updateUI(tabId, result.verdict, result.message);
-        });
-      });
-    } else if (tab.url && !/^https?:/i.test(tab.url)) {
-      // Clear badge on internal pages (chrome://, file://, etc.)
-      safeSetBadgeText(tabId, "");
-      safeSetTitle(tabId, "CERT Iffy: Interna stranica preglednika");
-    }
+  if (changeInfo.status === "loading" && changeInfo.url) {
+    safeSetBadgeText(tabId, "");
+    safeSetTitle(tabId, "ScamShop Detector: Kliknite za provjeru domene");
   }
 });
