@@ -66,7 +66,7 @@ Lažne internetske trgovine u pravilu oponašaju poznate robne marke (odjeću, o
 ## ⚙️ Kako funkcionira provjera
 
 1. **Provjera isključivo na vaš zahtjev (On-Demand provjera klikom)**:  
-   Prema preporuci i smjernicama Nacionalnog CERT-a, proširenje **ne skenira automatski svaku posjećenu stranicu**. Automatsko slanje upita za svaku domenu koju korisnik otvori preopteretilo bi poslužitelje servisa CERT iffy i ugrozilo redovitu noćnu obradu i verifikaciju novoprijavljenih lažnih trgovina. Zbog toga se provjera pokreće isključivo kada korisnik klikne na gumb *"Provjeri ovu domenu"*, unese adresu ručno ili odabere provjeru desnim klikom miša.
+   Kako se ne bi preopteretili poslužitelji servisa CERT iffy, provjera domena nije automatska, nego se pokreće isključivo kada korisnik klikne na gumb *"Provjeri ovu domenu"*, unese adresu ručno ili se odabere provjera desnim klikom miša.
 
 2. **Provjera u bazi prethodno detektiranih trgovina**:  
    Servis CERT iffy u trenutku unosa domene **ne provodi dubinsku analizu stranice u stvarnom vremenu**, već provjerava nalazi li se unesena domena na popisu internetskih trgovina koje je Nacionalni CERT **već ranije detektirao i označio kao lažne**.
@@ -145,7 +145,7 @@ Proširenje je u potpunosti usmjereno na zaštitu privatnosti korisnika:
 <details>
 <summary><strong>Zašto proširenje ne provjerava svaku stranicu automatski u pozadini?</strong></summary>
 <p>
-Nacionalni CERT je u svom stručnom mišljenju istaknuo da bi automatska provjera svake posjećene stranice stvorila preveliko opterećenje na njihov poslužitelj i ugrozila noćnu provjeru novih lažnih trgovina. Zato se provjera provodi isključivo kada korisnik klikne na gumb za provjeru ili odabere opciju desnim klikom.
+Kako se ne bi preopteretili poslužitelji servisa CERT iffy, provjera domena nije automatska, nego se pokreće isključivo kada korisnik klikne na gumb za provjeru, unese adresu ručno ili odabere provjeru desnim klikom miša.
 </p>
 </details>
 

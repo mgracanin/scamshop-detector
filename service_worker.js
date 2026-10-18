@@ -368,8 +368,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // Reset badge when navigating to a new URL so outdated check results are not displayed
-// NOTE: As requested by Nacionalni CERT, we do NOT automatically check every visited URL
-// to prevent server overload and preserve nightly store verification routines.
+// NOTE: Domain verification is not automatic to prevent overloading the CERT iffy service servers.
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "loading" && changeInfo.url) {
     safeSetBadgeText(tabId, "");
