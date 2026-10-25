@@ -24,7 +24,6 @@ Najnovija stabilna verzija proširenja dostupna je za izravno preuzimanje:
 | Verzija | Datum | Poveznica za preuzimanje | Bilješke izdanja |
 | :--- | :--- | :--- | :--- |
 | **v1.1.0 (Najnovije)** | 18.10.2026. | [⬇️ **scamshop-detector-v1.1.0.zip**](https://github.com/mgracanin/scamshop-detector/releases/download/v1.1.0/scamshop-detector-v1.1.0.zip) | [Pregledaj izmjene v1.1.0](https://github.com/mgracanin/scamshop-detector/releases/tag/v1.1.0) |
-| **v1.0.0** | 06.09.2026. | [⬇️ iffy-checker-v1.0.0.zip](https://github.com/mgracanin/scamshop-detector/releases/tag/v1.0.0) | Početna verzija |
 
 > 🚀 **Sva izdanja i povijest promjena**: Posjetite stranicu **[GitHub Releases](https://github.com/mgracanin/scamshop-detector/releases)** za popis svih dostupnih verzija i priloženih arhiva.
 
