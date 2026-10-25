@@ -16,9 +16,6 @@
           <span class="logo-subtitle">Provjera u bazi servisa CERT iffy</span>
         </div>
       </div>
-      <div class="header-badge" id="headerModeBadge" title="Provjera se provodi isključivo na vaš zahtjev (klik)">
-        <span>Provjera na klik</span>
-      </div>
     </header>
 
     <!-- Main Content Tabs -->
@@ -120,7 +117,7 @@
               </svg>
               Provjera isključivo na zahtjev
             </h4>
-            <p class="settings-desc">Kako se ne bi preopteretili poslužitelji servisa CERT iffy, provjera domena nije automatska, nego se pokreće isključivo na vaš zahtjev (klik).</p>
+            <p class="settings-desc">Kako se ne bi preopteretili poslužitelji servisa CERT iffy, provjera domena nije automatska, nego se pokreće isključivo tako da se klikne ikona proširenja.</p>
           </div>
         </div>
 
@@ -134,7 +131,7 @@
             </div>
             <div class="stat-card">
               <span class="stat-value stat-green" id="statSafe">0</span>
-              <span class="stat-label">Nije u bazi</span>
+              <span class="stat-label">Bez prijava</span>
             </div>
             <div class="stat-card">
               <span class="stat-value stat-red" id="statWarnings">0</span>
@@ -146,10 +143,10 @@
         <!-- Whitelist Management -->
         <div class="whitelist-section">
           <div class="panel-header">
-            <h4 class="section-title">Popis dopuštenih domena</h4>
+            <h4 class="section-title">Popis dozvoljenih domena</h4>
           </div>
           <form class="search-box add-whitelist-box" id="whitelistAddForm">
-            <input type="text" id="whitelistAddInput" placeholder="Dodaj domenu (npr. banka.hr)" autocomplete="off" aria-label="Domena za dodavanje na popis dopuštenih" />
+            <input type="text" id="whitelistAddInput" placeholder="Dodaj domenu (npr. banka.hr)" autocomplete="off" aria-label="Domena za dodavanje na popis dozvoljenih" />
             <button type="submit" class="btn btn-secondary btn-icon-only" aria-label="Dodaj domenu">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -162,7 +159,7 @@
               <!-- Dynamically populated -->
             </ul>
             <div class="empty-state" id="whitelistEmptyState">
-              <p>Popis dopuštenih domena je prazan</p>
+              <p>Popis dozvoljenih domena je prazan</p>
             </div>
           </div>
         </div>
@@ -178,7 +175,7 @@
               </svg>
               O proširenju &amp; važne napomene
             </h4>
-            <p class="settings-desc">Saznajte više o radu servisa CERT iffy, autoru i privatnosti.</p>
+            <p class="settings-desc">Saznajte više o servisu CERT iffy, o ovome proširenju te postavkama privatnosti.</p>
           </div>
           <div style="color: var(--text-secondary); display: flex; align-items: center;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">

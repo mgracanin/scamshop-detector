@@ -154,9 +154,9 @@ function displaySafetyStatus(result) {
   if (result.verdict === "safe") {
     // CERT iffy: Not recognized as fake store. NOTE: Does NOT guarantee absolute safety.
     shieldCard.classList.add("status-info");
-    shieldOverlay.innerHTML = svgInfo;
-    verdictText.textContent = "Nije u bazi lažnih trgovina";
-    descText.textContent = result.message || "Sustav CERT iffy nije prepoznao ovu domenu kao lažnu internet trgovinu, no prije donošenja odluke o kupovini uvijek provjerite Dodatne savjete.";
+    shieldOverlay.innerHTML = svgShield;
+    verdictText.textContent = "Nema zabilježenih prijava";
+    descText.textContent = result.message || "Sustav CERT iffy nije prepoznao ovu domenu kao lažnu internet trgovinu. Prije donošenja odluke o kupovini uvijek provjerite Dodatne savjete.";
     
     tipsActionArea.style.display = "block";
     actionRow.style.display = "flex";
@@ -165,12 +165,12 @@ function displaySafetyStatus(result) {
   } else if (result.verdict === "whitelisted") {
     shieldCard.classList.add("status-whitelisted");
     shieldOverlay.innerHTML = svgStar;
-    verdictText.textContent = "Dopuštena domena";
+    verdictText.textContent = "Dozvoljena domena";
     descText.textContent = "Domena se nalazi na vašem korisničkom popisu pouzdanih adresa.";
     
     tipsActionArea.style.display = "none";
     actionRow.style.display = "flex";
-    btnWhitelist.innerHTML = `${svgClose} <span>Ukloni iz dopuštenih</span>`;
+    btnWhitelist.innerHTML = `${svgClose} <span>Ukloni iz dozvoljenih</span>`;
     btnWhitelist.dataset.action = "remove";
   } else if (result.verdict === "warning") {
     // CERT iffy: Found in scam shop database
@@ -238,7 +238,7 @@ function renderHistory() {
       
       if (item.verdict === "safe") {
         badgeClass = "hist-badge-green";
-        iconSymbol = "ℹ";
+        iconSymbol = "OK";
       } else if (item.verdict === "warning") {
         badgeClass = "hist-badge-red";
         iconSymbol = "⚠";
@@ -510,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
         displaySafetyStatus({
           verdict: "whitelisted",
           domain: window.currentTabDomain,
-          message: "Domena se nalazi na vašem popisu dopuštenih."
+          message: "Domena se nalazi na vašem popisu dozvoljenih."
         });
         return;
       }
@@ -522,8 +522,8 @@ document.addEventListener("DOMContentLoaded", () => {
           if (cachedResult && cachedResult.status_code && cachedResult.verdict !== "error") {
             displaySafetyStatus(cachedResult);
           } else {
-            // Not cached: display ready-to-check state with "Provjeri ovu domenu" button
-            displayReadyState(window.currentTabDomain);
+            // Provjera se pokreće otvaranjem skočnog prozora (klikom na ikonu proširenja)
+            checkCurrentTab();
           }
         }
       );

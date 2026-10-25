@@ -96,12 +96,12 @@ function updateUI(tabId, verdict, description) {
   if (verdict === "whitelisted") {
     safeSetBadgeText(tabId, "WHT");
     safeSetBadgeBackgroundColor(tabId, "#1a73e8"); // Blue
-    safeSetTitle(tabId, `ScamShop Detector: Dopuštena domena (${description || "Popis pouzdanih"})`);
+    safeSetTitle(tabId, `ScamShop Detector: Dozvoljena domena (${description || "Popis pouzdanih"})`);
   } else if (verdict === "safe") {
-    // Clean / Not in DB - show green badge with INF text
-    safeSetBadgeText(tabId, "INF");
+    // Clean / Not in DB - show green badge with OK text
+    safeSetBadgeText(tabId, "OK");
     safeSetBadgeBackgroundColor(tabId, "#0f9d58"); // Google Material Green
-    safeSetTitle(tabId, `ScamShop Detector: Nije u bazi lažnih trgovina (provjerite dodatne savjete)`);
+    safeSetTitle(tabId, `ScamShop Detector: Nema prijava u bazi (prije kupovine provjerite savjete)`);
   } else if (verdict === "warning") {
     safeSetBadgeText(tabId, "WRN");
     safeSetBadgeBackgroundColor(tabId, "#d93025"); // Red alert
@@ -202,7 +202,7 @@ async function checkUrlFull(url, forceCheck = false) {
   if (isWhitelisted(domain, whitelist)) {
     return {
       status_code: 200,
-      message: "Domena se nalazi na vašem popisu dopuštenih (whitelist).",
+      message: "Domena se nalazi na vašem popisu dozvoljenih (whitelist).",
       verdict: "whitelisted",
       domain,
       url: domain

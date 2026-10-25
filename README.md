@@ -64,8 +64,8 @@ Lažne internetske trgovine u pravilu oponašaju poznate robne marke (odjeću, o
 
 ## ⚙️ Kako funkcionira provjera
 
-1. **Provjera isključivo na vaš zahtjev (On-Demand provjera klikom)**:  
-   Kako se ne bi preopteretili poslužitelji servisa CERT iffy, provjera domena nije automatska, nego se pokreće isključivo kada korisnik klikne na gumb *"Provjeri ovu domenu"*, unese adresu ručno ili se odabere provjera desnim klikom miša.
+1. **Provjera isključivo na vaš zahtjev (On-Demand provjera)**:  
+   Kako se ne bi preopteretili poslužitelji servisa CERT iffy, provjera domena nije automatska, nego se pokreće isključivo tako da se klikne ikona proširenja.
 
 2. **Provjera u bazi prethodno detektiranih trgovina**:  
    Servis CERT iffy u trenutku unosa domene **ne provodi dubinsku analizu stranice u stvarnom vremenu**, već provjerava nalazi li se unesena domena na popisu internetskih trgovina koje je Nacionalni CERT **već ranije detektirao i označio kao lažne**.
@@ -81,19 +81,19 @@ Prilikom provjere, proširenje prikazuje bedž na ikoni u alatnoj traci i detalj
 
 | Bedž | Boja | Status | Značenje i preporučena radnja |
 | :---: | :---: | :--- | :--- |
-| **`INF`** | Zelena | **Nije u bazi lažnih trgovina** | Domena se ne nalazi na popisu lažnih trgovina koje je CERT prethodno zabilježio. Prikazuje se nakon klika na provjeru. *Ovo nije garancija apsolutne sigurnosti.* Prije unosa kartice uvijek proučite [Dodatne savjete](https://iffy.cert.hr/tips). |
+| **`OK`** | Zelena | **Nema zabilježenih prijava** | Domena se ne nalazi na popisu lažnih trgovina koje je CERT prethodno zabilježio. Prikazuje se nakon klika na ikonu proširenja. *Ovo nije garancija apsolutne sigurnosti.* Prije unosa kartice uvijek proučite [Dodatne savjete](https://iffy.cert.hr/tips). |
 | **`WRN`** | Crvena | **Upozorenje: Obilježja lažne trgovine!** | Domena ima obilježja lažne trgovine u bazi servisa CERT iffy. **Izbjegavajte unos osobnih podataka i brojeva kartica.** |
-| **`WHT`** | Plava | **Dopuštena domena (Whitelist)** | Domena se nalazi na vašem korisničkom popisu pouzdanih adresa (npr. vaša banka ili poznata trgovina). Prikazuje se automatski pri posjetu stranici. |
+| **`WHT`** | Plava | **Dozvoljena domena (Whitelist)** | Domena se nalazi na vašem korisničkom popisu pouzdanih adresa (npr. vaša banka ili poznata trgovina). Prikazuje se automatski pri posjetu stranici. |
 | **`ERR`** | Neutralna | **Pogreška pri provjeri** | Servis CERT iffy trenutačno nije dostupan ili unesena adresa nije ispravnog oblika. |
 
 ---
 
 ## ✨ Mogućnosti
 
-- 🎯 **Provjera aktivne kartice jednim klikom**: Čim otvorite skočni prozor proširenja, kliknite na gumb *"Provjeri ovu domenu"* za trenutačnu usporedbu s bazom.
+- 🎯 **Provjera aktivne kartice jednim klikom**: Čim kliknete ikonu proširenja, automatski se pokreće provjera aktivne kartice i usporedba s bazom.
 - 🖱️ **Kontekstni izbornik (Desni klik)**: Kliknite desnom tipkom miša na bilo koju poveznicu ili otvorenu stranicu i odaberite *"Provjeri domenu sa servisom CERT iffy"* bez potrebe za otvaranjem stranice.
 - 🔎 **Ručna provjera**: Tražilica unutar skočnog prozora omogućuje upisivanje i testiranje bilo koje adrese (npr. sumnjivi link iz e-pošte ili SMS-a).
-- ⭐ **Popis pouzdanih adresa (Whitelist)**: Pohranite provjerene trgovine i institucije na svoj popis dopuštenih kako biste ih odmah prepoznali. Popis automatski pokriva i pripadajuće poddomene.
+- ⭐ **Popis dozvoljenih adresa (Whitelist)**: Pohranite provjerene trgovine i institucije na svoj popis dozvoljenih kako biste ih odmah prepoznali. Popis automatski pokriva i pripadajuće poddomene.
 - 🕒 **Lokalna evidencija i statistika**: Pratite povijest svojih provjera i osnovne brojače (provjereno, nije u bazi, upozorenja).
 - 💡 **Izravna poveznica na CERT savjete**: Jedan klik dijeli vas od službenih preporuka o provjeri domena, načina plaćanja i znakova prevare.
 
@@ -144,12 +144,12 @@ Proširenje je u potpunosti usmjereno na zaštitu privatnosti korisnika:
 <details>
 <summary><strong>Zašto proširenje ne provjerava svaku stranicu automatski u pozadini?</strong></summary>
 <p>
-Kako se ne bi preopteretili poslužitelji servisa CERT iffy, provjera domena nije automatska, nego se pokreće isključivo kada korisnik klikne na gumb za provjeru, unese adresu ručno ili odabere provjeru desnim klikom miša.
+Kako se ne bi preopteretili poslužitelji servisa CERT iffy, provjera domena nije automatska, nego se pokreće isključivo tako da se klikne ikona proširenja.
 </p>
 </details>
 
 <details>
-<summary><strong>Znači li poruka "Nije u bazi lažnih trgovina" da je stranica 100% sigurna?</strong></summary>
+<summary><strong>Znači li poruka "Nema zabilježenih prijava" da je stranica 100% sigurna?</strong></summary>
 <p>
 Ne. To znači samo da domena u tom trenutku nije evidentirana u CERT-ovoj bazi ranije prepoznatih lažnih trgovina. Trgovina može biti potpuno nova i još neprijavljena. Uvijek obratite pozornost na cijene koje djeluju nerealno nisko, način plaćanja i službene <a href="https://iffy.cert.hr/tips">Dodatne savjete</a>.
 </p>
