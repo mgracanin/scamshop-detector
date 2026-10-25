@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="icons/icon128.png" alt="ScamShop Detector Logo" width="96" height="96" />
+  <img src="icons/icon512.png" alt="ScamShop Detector Logo" width="128" height="128" />
 </p>
 
 <h1 align="center">ScamShop Detector</h1>
@@ -82,9 +82,9 @@ Prilikom provjere, proširenje prikazuje bedž na ikoni u alatnoj traci i detalj
 
 | Bedž | Boja | Status | Značenje i preporučena radnja |
 | :---: | :---: | :--- | :--- |
-| **`INF`** | Siva / Slate | **Nije u bazi lažnih trgovina** | Domena se ne nalazi na popisu lažnih trgovina koje je CERT prethodno zabilježio. *Ovo nije garancija apsolutne sigurnosti.* Prije unosa kartice uvijek proučite [Dodatne savjete](https://iffy.cert.hr/tips). |
+| **`INF`** | Zelena | **Nije u bazi lažnih trgovina** | Domena se ne nalazi na popisu lažnih trgovina koje je CERT prethodno zabilježio. Prikazuje se nakon klika na provjeru. *Ovo nije garancija apsolutne sigurnosti.* Prije unosa kartice uvijek proučite [Dodatne savjete](https://iffy.cert.hr/tips). |
 | **`WRN`** | Crvena | **Upozorenje: Obilježja lažne trgovine!** | Domena ima obilježja lažne trgovine u bazi servisa CERT iffy. **Izbjegavajte unos osobnih podataka i brojeva kartica.** |
-| **`WHT`** | Plava | **Dopuštena domena (Whitelist)** | Domena se nalazi na vašem korisničkom popisu pouzdanih adresa (npr. vaša banka ili poznata trgovina). |
+| **`WHT`** | Plava | **Dopuštena domena (Whitelist)** | Domena se nalazi na vašem korisničkom popisu pouzdanih adresa (npr. vaša banka ili poznata trgovina). Prikazuje se automatski pri posjetu stranici. |
 | **`ERR`** | Neutralna | **Pogreška pri provjeri** | Servis CERT iffy trenutačno nije dostupan ili unesena adresa nije ispravnog oblika. |
 
 ---
@@ -184,9 +184,13 @@ scamshop-detector/
 │   ├── popup.js          # Interaktivna logika sučelja (provjera na zahtjev)
 │   └── about.html        # Detaljne informacije, upute, pravne napomene i objašnjenja
 ├── icons/
+│   ├── icon.svg          # Vektorska ikona (SVG)
 │   ├── icon16.png        # Ikona 16x16 px
+│   ├── icon32.png        # Ikona 32x32 px
 │   ├── icon48.png        # Ikona 48x48 px
-│   └── icon128.png       # Ikona 128x128 px
+│   ├── icon128.png       # Ikona 128x128 px
+│   ├── icon256.png       # Ikona 256x256 px
+│   └── icon512.png       # Ikona 512x512 px (visoka razlučivost)
 ├── LICENSE               # MIT licenca otvorenog koda
 └── README.md             # Dokumentacija projekta
 ```

@@ -98,9 +98,9 @@ function updateUI(tabId, verdict, description) {
     safeSetBadgeBackgroundColor(tabId, "#1a73e8"); // Blue
     safeSetTitle(tabId, `ScamShop Detector: Dopuštena domena (${description || "Popis pouzdanih"})`);
   } else if (verdict === "safe") {
-    // Clean / Not in DB - show informative neutral indicator, not deceptive green guarantee
+    // Clean / Not in DB - show green badge with INF text
     safeSetBadgeText(tabId, "INF");
-    safeSetBadgeBackgroundColor(tabId, "#4a5568"); // Slate gray
+    safeSetBadgeBackgroundColor(tabId, "#0f9d58"); // Google Material Green
     safeSetTitle(tabId, `ScamShop Detector: Nije u bazi lažnih trgovina (provjerite dodatne savjete)`);
   } else if (verdict === "warning") {
     safeSetBadgeText(tabId, "WRN");
@@ -367,11 +367,60 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-// Reset badge when navigating to a new URL so outdated check results are not displayed
-// NOTE: Domain verification is not automatic to prevent overloading the CERT iffy service servers.
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "loading" && changeInfo.url) {
+// Check if tab URL matches whitelist and update UI automatically (uses local storage, 0 network requests)
+async function checkTabWhitelist(tabId, url) {
+  if (!tabId || !url || !/^https?:/i.test(url)) return false;
+  const domain = getDomain(url);
+  if (!domain) return false;
+  try {
+    const storage = await chrome.storage.local.get("whitelist");
+    const whitelist = storage.whitelist || [];
+    if (isWhitelisted(domain, whitelist)) {
+      updateUI(tabId, "whitelisted", domain);
+      return true;
+    }
+  } catch (e) {
+    // Non-critical local storage check error
+  }
+  return false;
+}
+
+// Automatically display WHT badge if on whitelist; otherwise leave badge clean for on-demand check
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  const currentUrl = changeInfo.url || tab?.url;
+  if (!currentUrl) return;
+
+  const isWl = await checkTabWhitelist(tabId, currentUrl);
+  if (!isWl && changeInfo.status === "loading") {
     safeSetBadgeText(tabId, "");
     safeSetTitle(tabId, "ScamShop Detector: Kliknite za provjeru domene");
+  }
+});
+
+// Update badge when switching active tabs
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  try {
+    const tab = await chrome.tabs.get(activeInfo.tabId);
+    if (tab && tab.url) {
+      await checkTabWhitelist(activeInfo.tabId, tab.url);
+    }
+  } catch (e) {}
+});
+
+// Immediately re-evaluate active tabs when whitelist is modified in storage
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.whitelist) {
+    chrome.tabs.query({ active: true }, (tabs) => {
+      tabs.forEach(tab => {
+        if (tab.id && tab.url) {
+          checkTabWhitelist(tab.id, tab.url).then(isWl => {
+            if (!isWl) {
+              safeSetBadgeText(tab.id, "");
+              safeSetTitle(tab.id, "ScamShop Detector: Kliknite za provjeru domene");
+            }
+          });
+        }
+      });
+    });
   }
 });

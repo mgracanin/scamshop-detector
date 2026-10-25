@@ -314,15 +314,15 @@ body {
 }
 
 .status-info {
-  --status-color: #1a73e8;
-  border-color: rgba(26, 115, 232, 0.25);
-  background: var(--bg-whitelist);
+  --status-color: #0f9d58;
+  border-color: rgba(15, 157, 88, 0.25);
+  background: var(--bg-safe);
 }
 
 .status-safe {
-  --status-color: #1a73e8;
-  border-color: rgba(26, 115, 232, 0.25);
-  background: var(--bg-whitelist);
+  --status-color: #0f9d58;
+  border-color: rgba(15, 157, 88, 0.25);
+  background: var(--bg-safe);
 }
 
 .status-whitelisted {

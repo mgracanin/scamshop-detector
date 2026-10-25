@@ -58,6 +58,16 @@ function normalizeDomain(input) {
   }
 }
 
+// Helper: Check if domain matches any item in the whitelist (supporting subdomains)
+function isWhitelisted(domain, whitelist) {
+  if (!domain || !whitelist || !Array.isArray(whitelist)) return false;
+  const cleanDomain = normalizeDomain(domain);
+  return whitelist.some(item => {
+    const cleanItem = normalizeDomain(item);
+    return cleanDomain === cleanItem || cleanDomain.endsWith("." + cleanItem);
+  });
+}
+
 // Display Ready-to-Check State for Current Tab
 function displayReadyState(domain) {
   const shieldCard = document.getElementById("shieldCard");
@@ -227,13 +237,13 @@ function renderHistory() {
       let iconSymbol = "ℹ";
       
       if (item.verdict === "safe") {
-        badgeClass = "hist-badge-blue";
+        badgeClass = "hist-badge-green";
         iconSymbol = "ℹ";
       } else if (item.verdict === "warning") {
         badgeClass = "hist-badge-red";
         iconSymbol = "⚠";
       } else if (item.verdict === "whitelisted") {
-        badgeClass = "hist-badge-purple";
+        badgeClass = "hist-badge-blue";
         iconSymbol = "★";
       }
 
@@ -493,11 +503,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.currentTabUrl = activeTab.url;
     window.currentTabDomain = getDomain(activeTab.url);
 
-    // Check if this domain is already in local whitelist
+    // Check if this domain is already in local whitelist (with subdomain support)
     chrome.storage.local.get("whitelist", (res) => {
       const whitelist = res.whitelist || [];
-      const clean = normalizeDomain(window.currentTabDomain);
-      if (whitelist.some(item => normalizeDomain(item) === clean)) {
+      if (isWhitelisted(window.currentTabDomain, whitelist)) {
         displaySafetyStatus({
           verdict: "whitelisted",
           domain: window.currentTabDomain,
