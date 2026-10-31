@@ -16,3 +16,18 @@ payload.json
 
 # Distribution archives
 *.zip
+
+# Local development dependencies and test artifacts
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+.dev-tools/
+
+# Local instructions, notes and configuration
+*.md
+dist/
+/dozvoljena-domena.png
+/upozorenje.png
+/zeleno.png
+/docs/

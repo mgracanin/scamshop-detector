@@ -19,38 +19,35 @@
     </header>
 
     <!-- Main Content Tabs -->
-    <main class="content-container">
+    <main class="content-container" id="contentContainer">
+      <div class="error-banner" id="errorBanner" role="status" aria-live="polite" hidden></div>
       
       <!-- Tab 1: Safety Dashboard -->
-      <section id="tab-safety" class="tab-panel active">
+        <section id="tab-safety" class="tab-panel active" role="tabpanel" aria-labelledby="navSafety" tabindex="0">
         <!-- Shield Card -->
-        <div class="shield-card" id="shieldCard">
-          <div class="shield-wrapper">
-            <!-- Shield SVG -->
-            <svg class="shield-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 22C17.5 19.1 19 14.5 19 9.5V5L12 2L5 5V9.5C5 14.5 6.5 19.1 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <div class="shield-icon-overlay" id="shieldOverlay">
-              <!-- Inline Info/Warn symbols inside JS -->
+        <div class="shield-card" id="shieldCard" aria-busy="true">
+          <div class="status-heading">
+            <div class="shield-wrapper" aria-hidden="true"><div class="shield-icon-overlay" id="shieldOverlay"></div></div>
+            <div class="status-heading-copy" role="status" aria-live="polite" aria-atomic="true">
+              <p class="status-domain" id="statusDomain">...</p>
+              <h2 class="status-verdict" id="statusVerdict">Učitavanje stranice...</h2>
             </div>
           </div>
-          <h2 class="status-verdict" id="statusVerdict">Učitavanje stranice...</h2>
-          <p class="status-domain" id="statusDomain">...</p>
           <p class="status-description" id="statusDescription">Priprema provjere domene...</p>
+          <details class="error-details" id="errorDetails" hidden>
+            <summary>Tehnički detalji</summary>
+            <p id="errorTechnical"></p>
+          </details>
+          <p class="status-caveat" id="statusCaveat" hidden>Izostanak prijave nije jamstvo sigurnosti.</p>
+          <details class="meaning-details" id="meaningDetails" hidden>
+            <summary>Što rezultat znači?</summary>
+            <p>CERT iffy provjerava nalazi li se domena na popisu trgovina koje je Nacionalni CERT ranije detektirao kao lažne. Ne analizira stranicu uživo. Ako domena nije prepoznata kao lažna, to ne jamči sigurnost kupovine. Odluku donosite na vlastitu odgovornost; prije kupovine pregledajte <a href="https://iffy.cert.hr/tips" target="_blank" rel="noopener">službene dodatne savjete</a>.</p>
+          </details>
+          <p class="warning-advice" id="warningAdvice" hidden>Ne unosite podatke kartice.</p>
 
           <!-- Primary Trigger Button for Active Tab -->
-          <div class="main-action-area" id="mainActionArea" style="display: none; margin-top: 14px; width: 100%;">
-            <button class="btn btn-primary btn-block" id="btnCheckActiveTab">
-              <svg viewBox="0 0 24 24" class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              <span>Provjeri ovu domenu</span>
-            </button>
-          </div>
-
           <!-- Official Tips Link Area (shown after check) -->
-          <div class="tips-action-area" id="tipsActionArea" style="display: none; margin-top: 12px; width: 100%;">
+          <div class="tips-action-area" id="tipsActionArea">
             <a href="https://iffy.cert.hr/tips" target="_blank" rel="noopener" class="btn btn-tips" id="btnTipsLink">
               <svg viewBox="0 0 24 24" class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -61,7 +58,8 @@
             </a>
           </div>
           
-          <div class="action-row" id="safetyActionRow" style="display: none; margin-top: 10px;">
+          <div class="action-row" id="safetyActionRow">
+            <button class="btn btn-secondary btn-sm" id="btnRefreshCheck" type="button" aria-label="Ponovi provjeru">Ponovi provjeru</button>
             <button class="btn btn-secondary btn-sm" id="btnWhitelistCurrent">
               <svg viewBox="0 0 24 24" class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -71,9 +69,6 @@
           </div>
 
           <!-- Educational disclaimer regarding database nature -->
-          <div class="cert-info-box" id="certInfoBox" style="margin-top: 14px;">
-            <p><strong>Važna napomena:</strong> CERT iffy provjerava nalazi li se domena na popisu trgovina koje su prethodno detektirane kao lažne. Servis ne analizira stranicu uživo u trenutku provjere pa premda nije označena kao lažna, potreban je povećan oprez.</p>
-          </div>
         </div>
 
         <!-- Manual URL Check Form -->
@@ -87,10 +82,19 @@
       </section>
 
       <!-- Tab 2: Activity History -->
-      <section id="tab-history" class="tab-panel">
+      <section id="tab-history" class="tab-panel" role="tabpanel" aria-labelledby="navHistory" tabindex="0" hidden>
         <div class="panel-header">
           <h3 class="section-title">Povijest provjera</h3>
           <button class="btn btn-text btn-sm" id="btnClearHistory">Očisti povijest</button>
+        </div>
+        <div class="stats-grid history-stats" aria-label="Statistika provjera">
+          <div class="stat-card"><span class="stat-value" id="statScanned">0</span><span class="stat-label">Provjereno</span></div>
+          <div class="stat-card"><span class="stat-value stat-green" id="statSafe">0</span><span class="stat-label">Bez prijava</span></div>
+          <div class="stat-card"><span class="stat-value stat-red" id="statWarnings">0</span><span class="stat-label">Upozorenja</span></div>
+        </div>
+        <div class="undo-banner" id="undoNotice" role="status" aria-live="polite" hidden>
+          <span id="undoMessage">Zapis je uklonjen.</span>
+          <button class="btn btn-secondary btn-sm" id="btnUndoDelete" type="button">Vrati</button>
         </div>
         <div class="history-list-wrapper">
           <ul class="history-list" id="historyList">
@@ -107,39 +111,7 @@
       </section>
 
       <!-- Tab 3: Settings & Stats -->
-      <section id="tab-settings" class="tab-panel">
-        <!-- On-Demand Explanation Card -->
-        <div class="settings-row card-row">
-          <div class="settings-text">
-            <h4 class="settings-label" style="display: flex; align-items: center; gap: 6px;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px; color: var(--accent-color);">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-              Provjera isključivo na zahtjev
-            </h4>
-            <p class="settings-desc">Kako se ne bi preopteretili poslužitelji servisa CERT iffy, provjera domena nije automatska, nego se pokreće isključivo tako da se klikne ikona proširenja.</p>
-          </div>
-        </div>
-
-        <!-- Session Stats Dashboard -->
-        <div class="stats-dashboard">
-          <h4 class="section-title">Statistika provjera</h4>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <span class="stat-value" id="statScanned">0</span>
-              <span class="stat-label">Provjereno</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-value stat-green" id="statSafe">0</span>
-              <span class="stat-label">Bez prijava</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-value stat-red" id="statWarnings">0</span>
-              <span class="stat-label">Upozorenja</span>
-            </div>
-          </div>
-        </div>
-
+      <section id="tab-settings" class="tab-panel" role="tabpanel" aria-labelledby="navSettings" tabindex="0" hidden>
         <!-- Whitelist Management -->
         <div class="whitelist-section">
           <div class="panel-header">
@@ -165,10 +137,10 @@
         </div>
 
         <!-- About & Privacy Link -->
-        <div class="settings-row card-row" style="margin-top: 16px; cursor: pointer;" id="rowAbout">
+        <button class="settings-row card-row about-button" type="button" id="rowAbout">
           <div class="settings-text">
-            <h4 class="settings-label" style="display: flex; align-items: center; gap: 6px;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+            <h4 class="settings-label settings-label-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -177,32 +149,32 @@
             </h4>
             <p class="settings-desc">Saznajte više o servisu CERT iffy, o ovome proširenju te postavkama privatnosti.</p>
           </div>
-          <div style="color: var(--text-secondary); display: flex; align-items: center;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+          <div class="about-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </div>
-        </div>
+        </button>
       </section>
 
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="nav-bar">
-      <button class="nav-btn active" data-tab="tab-safety">
+    <nav class="nav-bar" role="tablist" aria-label="Glavna navigacija">
+      <button class="nav-btn active" id="navSafety" role="tab" aria-selected="true" aria-controls="tab-safety" tabindex="0" data-tab="tab-safety">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22C17.5 19.1 19 14.5 19 9.5V5L12 2L5 5V9.5C5 14.5 6.5 19.1 12 22Z"/>
         </svg>
         <span>Provjera</span>
       </button>
-      <button class="nav-btn" data-tab="tab-history">
+      <button class="nav-btn" id="navHistory" role="tab" aria-selected="false" aria-controls="tab-history" tabindex="-1" data-tab="tab-history">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <polyline points="12 6 12 12 16 14"/>
         </svg>
         <span>Povijest</span>
       </button>
-      <button class="nav-btn" data-tab="tab-settings">
+      <button class="nav-btn" id="navSettings" role="tab" aria-selected="false" aria-controls="tab-settings" tabindex="-1" data-tab="tab-settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -210,6 +182,6 @@
         <span>Postavke</span>
       </button>
     </nav>
-    <script src="popup.js"></script>
+    <script type="module" src="popup.js"></script>
   </body>
 </html>

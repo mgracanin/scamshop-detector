@@ -1,426 +1,54 @@
-/**
- * ScamShop Detector background service worker
- * Handles on-demand domain analysis via CERT iffy API, whitelisting, history logging, and caching.
- * Unofficial extension - not developed by CARNET or Nacionalni CERT.
- * Author: Matija Gračanin
- */
+import { createRuntime } from "./background/runtime.js";
 
-const IFFY_ROOT = "https://iffy.cert.hr";
-const IFFY_VALIDATE = `${IFFY_ROOT}/validate`;
-
-// In-memory cache for API responses (TTL 10 minutes)
-const CACHE_TTL_MS = 10 * 60 * 1000;
-const domainCache = new Map(); // domain -> { verdict, message, status_code, timestamp }
-
-function getCachedResult(domain) {
-  const cached = domainCache.get(domain);
-  if (!cached) return null;
-  if (Date.now() - cached.timestamp > CACHE_TTL_MS) {
-    domainCache.delete(domain);
-    return null;
-  }
-  return cached;
-}
-
-function setCachedResult(domain, result) {
-  domainCache.set(domain, {
-    verdict: result.verdict,
-    message: result.message,
-    status_code: result.status_code,
-    timestamp: Date.now()
-  });
-  if (domainCache.size > 500) {
-    const firstKey = domainCache.keys().next().value;
-    domainCache.delete(firstKey);
-  }
-}
-
-// Helper: Safely extract domain hostname
-function getDomain(url) {
-  if (!url || typeof url !== "string") return "";
-  try {
-    let toParse = url.trim();
-    if (!/^https?:\/\//i.test(toParse)) {
-      toParse = "https://" + toParse;
-    }
-    const urlObj = new URL(toParse);
-    return urlObj.hostname.toLowerCase();
-  } catch (e) {
-    return url.trim().toLowerCase().split("/")[0].split(":")[0];
-  }
-}
-
-// Helper: Normalize domain for whitelist comparison (strips www.)
-function normalizeForWhitelist(domain) {
-  if (!domain) return "";
-  return domain.trim().toLowerCase().replace(/^www\./, "");
-}
-
-// Helper: Check if domain matches any item in the whitelist
-function isWhitelisted(domain, whitelist) {
-  if (!domain || !whitelist || !Array.isArray(whitelist)) return false;
-  const cleanDomain = normalizeForWhitelist(domain);
-  return whitelist.some(item => {
-    const cleanItem = normalizeForWhitelist(item);
-    return cleanDomain === cleanItem || cleanDomain.endsWith("." + cleanItem);
-  });
-}
-
-// Helper: Safe Badge Operations to prevent unhandled runtime exceptions
-function safeSetBadgeText(tabId, text) {
-  if (!tabId) return;
-  chrome.action.setBadgeText({ tabId, text }).catch(() => {
-    // Tab might have been closed before async operation completed
-  });
-}
-
-function safeSetBadgeBackgroundColor(tabId, color) {
-  if (!tabId) return;
-  chrome.action.setBadgeBackgroundColor({ tabId, color }).catch(() => {
-    // Tab might have been closed before async operation completed
-  });
-}
-
-function safeSetTitle(tabId, title) {
-  if (!tabId) return;
-  chrome.action.setTitle({ tabId, title }).catch(() => {
-    // Tab might have been closed before async operation completed
-  });
-}
-
-// Update Badge UI & Tooltip based on verdict
-// NOTE: We deliberately do NOT display an all-clear green checkmark (which could give a false sense of security)
-function updateUI(tabId, verdict, description) {
-  if (!tabId) return;
-
-  if (verdict === "whitelisted") {
-    safeSetBadgeText(tabId, "WHT");
-    safeSetBadgeBackgroundColor(tabId, "#1a73e8"); // Blue
-    safeSetTitle(tabId, `ScamShop Detector: Dozvoljena domena (${description || "Popis pouzdanih"})`);
-  } else if (verdict === "safe") {
-    // Clean / Not in DB - show green badge with OK text
-    safeSetBadgeText(tabId, "OK");
-    safeSetBadgeBackgroundColor(tabId, "#0f9d58"); // Google Material Green
-    safeSetTitle(tabId, `ScamShop Detector: Nema prijava u bazi (prije kupovine provjerite savjete)`);
-  } else if (verdict === "warning") {
-    safeSetBadgeText(tabId, "WRN");
-    safeSetBadgeBackgroundColor(tabId, "#d93025"); // Red alert
-    safeSetTitle(tabId, `ScamShop Detector UPOZORENJE: ${description || "Moguća lažna trgovina!"}`);
-  } else {
-    safeSetBadgeText(tabId, "ERR");
-    safeSetBadgeBackgroundColor(tabId, "#808080"); // Gray
-    safeSetTitle(tabId, `ScamShop Detector: Pogreška pri provjeri (${description || "Servis nedostupan"})`);
-  }
-}
-
-// Session state management for CERT Iffy
-let hasSession = false;
-
-async function ensureSession() {
-  if (!hasSession) {
-    try {
-      await fetch(IFFY_ROOT, { credentials: "include" });
-      hasSession = true;
-    } catch (e) {
-      // Ignore initial landing fetch failure; validate request will still attempt
-    }
-  }
-}
-
-// Core API scan: sends sanitized domain only to respect user privacy
-async function fetchIffyApi(domain) {
-  await ensureSession();
-
-  let res;
-  try {
-    res = await fetch(IFFY_VALIDATE, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ match: domain })
-    });
-  } catch (networkErr) {
-    hasSession = false;
-    throw new Error(`Mrežna pogreška pri povezivanju sa servisom CERT Iffy: ${networkErr.message}`);
-  }
-
-  // Handle session expiration or invalid session
-  if (!res.ok) {
-    hasSession = false;
-    await ensureSession();
-    res = await fetch(IFFY_VALIDATE, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ match: domain })
-    });
-  }
-
-  if (!res.ok) {
-    throw new Error(`API returned status ${res.status}`);
-  }
-
-  const data = await res.json();
-
-  // Retry once if server reports request was not received (session expired)
-  if (data.message && data.message.includes("Poslužitelj nije zaprimio zahtjev")) {
-    hasSession = false;
-    await ensureSession();
-    const retryRes = await fetch(IFFY_VALIDATE, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ match: domain })
-    });
-    if (retryRes.ok) {
-      return await retryRes.json();
-    }
-  }
-
-  return data;
-}
-
-// Full check logic wrapping API, Whitelist, Cache, History, Stats and Settings
-async function checkUrlFull(url, forceCheck = false) {
-  const domain = getDomain(url);
-  if (!domain || (!url.startsWith("http:") && !url.startsWith("https:"))) {
-    return {
-      status_code: 400,
-      message: "Interna stranica ili nepodržani protokol (provjera nije potrebna).",
-      verdict: "error",
-      domain: domain || "unknown",
-      url: domain
-    };
-  }
-
-  // Fetch extension state from storage
-  const storage = await chrome.storage.local.get(["protectionEnabled", "whitelist"]);
-  const protectionEnabled = storage.protectionEnabled !== false;
-  const whitelist = storage.whitelist || [];
-
-  // Check if whitelisted by user
-  if (isWhitelisted(domain, whitelist)) {
-    return {
-      status_code: 200,
-      message: "Domena se nalazi na vašem popisu dozvoljenih (whitelist).",
-      verdict: "whitelisted",
-      domain,
-      url: domain
-    };
-  }
-
-  // Check memory cache unless forced check requested
-  if (!forceCheck) {
-    const cached = getCachedResult(domain);
-    if (cached) {
-      return {
-        status_code: cached.status_code,
-        message: cached.message,
-        verdict: cached.verdict,
-        domain,
-        url: domain
-      };
-    }
-  }
-
-  let verdict = "error";
-  let message = "";
-  let statusCode = 200;
-
-  try {
-    const data = await fetchIffyApi(domain);
-    message = data.message || "";
-
-    // Check for server validation errors
-    if (message.includes("Unesena vrijednost nije URL") || message.includes("Poslužitelj nije zaprimio zahtjev")) {
-      verdict = "error";
-      statusCode = 400;
-    } else if (data.exist === true) {
-      // Domain identified in CERT-HR fraudulent store database
-      verdict = "warning";
-      statusCode = 200;
-      if (!message) {
-        message = "Poveznica ima obilježja lažne internetske trgovine u bazi servisa CERT iffy. Prije donošenja odluke o kupovini provjerite Dodatne savjete.";
-      }
-    } else if (data.exist === false) {
-      // Domain not found in fake store database
-      verdict = "safe";
-      statusCode = 200;
-      if (!message) {
-        message = "Sustav CERT iffy nije prepoznao ovu domenu kao lažnu internet trgovinu, no prije donošenja odluke o kupovini provjerite Dodatne savjete.";
-      }
-    } else {
-      // Fallback text check
-      const msg = message.toLowerCase();
-      if (msg.includes("nije prepoznao") || msg.includes("nije u bazi")) {
-        verdict = "safe";
-      } else {
-        verdict = "warning";
-      }
-    }
-  } catch (err) {
-    statusCode = 500;
-    message = err.message || "Pogreška pri povezivanju sa servisom CERT Iffy.";
-    verdict = "error";
-  }
-
-  const result = {
-    status_code: statusCode,
-    message,
-    verdict,
-    domain,
-    url: domain
-  };
-
-  // Cache safe and warning responses
-  if (verdict === "safe" || verdict === "warning") {
-    setCachedResult(domain, result);
-  }
-
-  // Update History & Stats (re-fetch live storage right before write to avoid race conditions)
-  if (verdict === "safe" || verdict === "warning") {
-    try {
-      const liveData = await chrome.storage.local.get(["history", "stats"]);
-      const history = liveData.history || [];
-      const stats = liveData.stats || { scanned: 0, safe: 0, warnings: 0 };
-      const now = Date.now();
-      const lastItem = history[0];
-      const isDuplicate = lastItem && lastItem.domain === domain && (now - lastItem.timestamp < 10000);
-
-      if (!isDuplicate) {
-        history.unshift({
-          url: domain,
-          domain,
-          status_code: statusCode,
-          message,
-          verdict,
-          timestamp: now
-        });
-
-        if (history.length > 100) {
-          history.pop();
-        }
-
-        stats.scanned = (stats.scanned || 0) + 1;
-        if (verdict === "safe") {
-          stats.safe = (stats.safe || 0) + 1;
-        } else if (verdict === "warning") {
-          stats.warnings = (stats.warnings || 0) + 1;
-        }
-
-        await chrome.storage.local.set({ history, stats });
-      }
-    } catch (e) {
-      // Non-critical storage error
-    }
-  }
-
-  return result;
-}
-
-// Context Menu Setup and Storage Initialization
-chrome.runtime.onInstalled.addListener(async () => {
-  chrome.contextMenus.removeAll(() => {
+const runtime = createRuntime(chrome);
+const safely = (promise) => {
+  promise.catch(() => console.warn("ScamShop Detector: EVENT_FAILED"));
+};
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  runtime.command(message).then(sendResponse, () =>
+    sendResponse({
+      ok: false,
+      error: { code: "INTERNAL_ERROR", message: "Neočekivana pogreška." },
+    }),
+  );
+  return true;
+});
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.removeAll(() =>
     chrome.contextMenus.create({
       id: "scamshop-check",
       title: "Provjeri domenu sa servisom CERT iffy",
-      contexts: ["page", "link"]
-    });
-  });
-
-  const storage = await chrome.storage.local.get(["whitelist", "history", "stats"]);
-  const updates = {};
-  if (storage.whitelist === undefined) updates.whitelist = [];
-  if (storage.history === undefined) updates.history = [];
-  if (storage.stats === undefined) updates.stats = { scanned: 0, safe: 0, warnings: 0 };
-
-  if (Object.keys(updates).length > 0) {
-    await chrome.storage.local.set(updates);
-  }
+      contexts: ["page", "link"],
+    }),
+  );
 });
-
-// Context-menu trigger
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === "scamshop-check" || info.menuItemId === "iffy-check" || info.menuItemId === "iffy‑check") {
-    const urlToTest = info.linkUrl || info.pageUrl;
-    if (!urlToTest) return;
-
-    checkUrlFull(urlToTest, true).then((result) => {
-      if (tab && tab.id) {
-        updateUI(tab.id, result.verdict, result.message);
-        chrome.tabs.sendMessage(tab.id, { type: "IFFY_RESULT", url: urlToTest, result }).catch(() => {});
-      }
-    });
-  }
+  safely(runtime.contextMenu(info, tab));
 });
-
-// Listener for manual triggers from the popup UI
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === "CHECK_URL") {
-    checkUrlFull(msg.url, msg.forceCheck).then((result) => {
-      if (msg.tabId) {
-        updateUI(msg.tabId, result.verdict, result.message);
-      }
-      sendResponse(result);
-    });
-    return true; // Keep port open for async sendResponse
-  }
+chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
+  if (change.url || change.status === "loading")
+    safely(runtime.navigate(tabId, change.url || tab.url));
 });
-
-// Check if tab URL matches whitelist and update UI automatically (uses local storage, 0 network requests)
-async function checkTabWhitelist(tabId, url) {
-  if (!tabId || !url || !/^https?:/i.test(url)) return false;
-  const domain = getDomain(url);
-  if (!domain) return false;
-  try {
-    const storage = await chrome.storage.local.get("whitelist");
-    const whitelist = storage.whitelist || [];
-    if (isWhitelisted(domain, whitelist)) {
-      updateUI(tabId, "whitelisted", domain);
-      return true;
-    }
-  } catch (e) {
-    // Non-critical local storage check error
-  }
-  return false;
-}
-
-// Automatically display WHT badge if on whitelist; otherwise leave badge clean for on-demand check
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  const currentUrl = changeInfo.url || tab?.url;
-  if (!currentUrl) return;
-
-  const isWl = await checkTabWhitelist(tabId, currentUrl);
-  if (!isWl && changeInfo.status === "loading") {
-    safeSetBadgeText(tabId, "");
-    safeSetTitle(tabId, "ScamShop Detector: Kliknite za provjeru domene");
-  }
+chrome.tabs.onActivated.addListener((info) => {
+  safely(
+    chrome.tabs
+      .get(info.tabId)
+      .then((tab) => runtime.activate(info.tabId, tab.url)),
+  );
 });
-
-// Update badge when switching active tabs
-chrome.tabs.onActivated.addListener(async (activeInfo) => {
-  try {
-    const tab = await chrome.tabs.get(activeInfo.tabId);
-    if (tab && tab.url) {
-      await checkTabWhitelist(activeInfo.tabId, tab.url);
-    }
-  } catch (e) {}
-});
-
-// Immediately re-evaluate active tabs when whitelist is modified in storage
+chrome.tabs.onRemoved.addListener((tabId) => runtime.removeTab(tabId));
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.whitelist) {
-    chrome.tabs.query({ active: true }, (tabs) => {
-      tabs.forEach(tab => {
-        if (tab.id && tab.url) {
-          checkTabWhitelist(tab.id, tab.url).then(isWl => {
-            if (!isWl) {
-              safeSetBadgeText(tab.id, "");
-              safeSetTitle(tab.id, "ScamShop Detector: Kliknite za provjeru domene");
-            }
-          });
-        }
-      });
-    });
+    safely(
+      chrome.tabs
+        .query({ active: true })
+        .then((tabs) =>
+          Promise.all(
+            tabs
+              .filter((tab) => tab.id != null)
+              .map((tab) => runtime.navigate(tab.id, tab.url)),
+          ),
+        ),
+    );
   }
 });

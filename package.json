@@ -1,0 +1,37 @@
+{
+  "name": "scamshop-detector-dev",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "description": "Development tools for ScamShop Detector",
+  "scripts": {
+    "install:browser": "node scripts/install-browser.cjs",
+    "lint": "eslint .",
+    "format:check": "prettier --check \"**/*.{js,cjs,json,yml}\"",
+    "format": "prettier --write \"**/*.{js,cjs,json,yml}\"",
+    "validate": "node scripts/validate.cjs",
+    "test:unit": "node --test tests/unit/*.test.js",
+    "check": "npm run lint && npm run format:check && npm run validate && npm run test:unit",
+    "test": "playwright test",
+    "test:package": "node scripts/test-package.cjs",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "package": "npm run validate && node scripts/package.cjs && npm run validate -- dist/extension",
+    "verify": "npm run check && npm run build && npm run test:package",
+    "build": "npm run package"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.63.0",
+    "eslint": "^10.14.0",
+    "fflate": "^0.8.3",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10"
+  },
+  "overrides": {
+    "minimatch": "^11.0.3"
+  }
+}
