@@ -1,0 +1,8 @@
+## ScamShop Detector 1.2.0
+
+- Osvježeno sučelje skočnog prozora s jasnijim prikazom provjere, povijesti i dozvoljenih domena.
+- Poboljšana pristupačnost i rukovanje tipkovnicom u sučelju.
+- Ojačana dosljednost lokalne povijesti, statistike i popisa dozvoljenih domena.
+- Proširene automatske provjere i reproducibilno pakiranje arhive za izdanje.
+
+Provjera se i dalje pokreće na zahtjev i CERT iffy prima samo normaliziranu domenu.
