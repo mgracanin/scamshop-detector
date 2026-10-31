@@ -150,6 +150,9 @@ test("compact popup reflows at narrow width and doubled scale", async ({
   await page.evaluate(() => {
     document.documentElement.style.zoom = "2";
   });
+  // Stress the same intrinsic-size limit with a narrower layout as well;
+  // platform font metrics must not force the tab buttons wider than the popup.
+  await page.setViewportSize({ width: 280, height: 600 });
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

@@ -6,6 +6,9 @@ import {
 } from "../shared/domain.js";
 import { createView } from "./view.js";
 
+if (chrome.extension.getViews({ type: "popup" }).includes(window))
+  document.documentElement.classList.add("toolbar-popup");
+
 const state = {
   initialTab: null,
   displayedTarget: null,
